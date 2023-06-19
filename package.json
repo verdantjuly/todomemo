@@ -2,5 +2,15 @@
   "dependencies": {
     "express": "^4.18.2",
     "mongoose": "^7.3.0"
-  }
+  },
+  "name": "todomemo",
+  "version": "1.0.0",
+  "main": "app.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "description": ""
 }

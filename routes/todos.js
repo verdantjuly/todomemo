@@ -1,7 +1,6 @@
 const express = require('express');
 const router = express.Router();
 const alltodos = require("../models/todo");
-const mongoose = require("mongoose");
 
 // 할 일 추가하기
 router.post("/todos", async (req, res) => {
@@ -11,18 +10,21 @@ router.post("/todos", async (req, res) => {
     const lasttodos = await alltodos.find().sort({ order: -1 }).findOne()
     const done = false
     const doneAt = null
+    const todoid = null
 
     if (value && !firsttodos) {
-        await alltodos.create({ value, order, done, doneAt })
-        const result = alltodos.findOne({ value })
+        await alltodos.create({ value, order, done, doneAt, todoid })
+        const target = await alltodos.findOne({ value })
+        await alltodos.updateOne({ value }, { "todoid": target._id })
 
-        return res.status(200).json({ "message": "첫 번째 할일 등록을 축하합니다. 당신의 id는 " + result['_id'] + "입니다. todoid를 기억하셔야 정보를 관리할 수 있습니다." })
+        return res.status(200).json({ "message": "첫 번째 할일 등록을 축하합니다. " })
     } else if (value && firsttodos) {
         order = order + lasttodos.order
-        await alltodos.create({ value, order, done, doneAt })
-        const result = alltodos.findOne({ value })
+        await alltodos.create({ value, order, done, doneAt, todoid })
+        const target = await alltodos.findOne({ value })
+        await alltodos.updateOne({ value }, { "todoid": target._id })
 
-        return res.status(200).json({ "message": "할 일이 등록되었습니다.당신의 id는 " + result['_id'] + "입니다. todoid를 기억하셔야 정보를 관리할 수 있습니다." })
+        return res.status(200).json({ "message": "할 일이 등록되었습니다. " })
     } else if (!value) {
         return res.status(400).json({
             success: false,
@@ -56,7 +58,7 @@ router.patch("/todos/:todoid", async (req, res) => {
 })
 
 router.patch("/todos/:todoid/upgrade", async (req, res) => {
-    const target = await alltodos.findById(todoid).select("+_id")
+    const target = await alltodos.findById(todoid)
     if (target.order !== 1) {
         await target.updateOne({ "order": target.order - 1 })
         await alltodos.findOne({ "order": target.order - 1 }).updateOne({ "order": target.order })
